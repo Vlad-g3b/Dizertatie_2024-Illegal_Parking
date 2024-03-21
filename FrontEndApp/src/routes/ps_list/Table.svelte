@@ -1,14 +1,16 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    let myList = [];
+    let myList: any[] = [];
   
     export let list: Array<object>;
     export let infractionsStore: import("svelte/store").Writable<Array<object>>;
+
+    const apiUrl = import.meta.env.VITE_API_URL;
     onMount(() => {
       myList = JSON.parse(infractionsStore).ParkingSiteList;    
     });
-    async function doPost (ep,data) {
-		const res = await fetch('http://172.17.0.7:5000/' + ep, {
+    async function doPost (ep: string,data: { tf_id: any; tf_type: string; is_resolved: number; }) {
+		const res = await fetch(apiUrl + '/' + ep, {
 			method: 'POST',
             headers: {'Accept': 'application/json', 'Content-Type': 'application/json'}, 
 			body: JSON.stringify(data)
@@ -17,7 +19,7 @@
 		const json = await res.json();
     
     }
-    function onColumnClick(id){
+    function onColumnClick(id: string){
         console.log("click " + id)
         var data = {
                     "tf_id" : id,
@@ -26,7 +28,6 @@
                     }
         doPost("updateResolved",data);
         var elem = document.getElementById("btn_"+id);
-        console.log(elem);
         elem.innerHTML = 'Resolved'    
         elem.disabled = true  
       }    

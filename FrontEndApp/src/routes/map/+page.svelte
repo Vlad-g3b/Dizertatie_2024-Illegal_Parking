@@ -5,9 +5,10 @@
      * @type {typeof import("./Map.svelte").default}
      */
     let Map;
-    const infractionsStore = writable([]);
+    const apiUrl = import.meta.env.VITE_API_URL;
+        const infractionsStore = writable([]);
     async function getListItems() {
-    const res = await fetch('http://172.17.0.7:5000/getAllUnresolvedTrafficViolation');
+    const res = await fetch(apiUrl + '/getAllUnresolvedTrafficViolation');
       if (res.ok) {
           return await res.text();
       } else {
@@ -24,7 +25,7 @@
         console.error('Error importing Map component:', error);
       });
     }
-        const eventSource = new EventSource("http://172.17.0.7:5000/sse");
+        const eventSource = new EventSource(apiUrl + "/sse");
         eventSource.onmessage = (event) => {
             // Handle incoming SSE data
             const infractions = JSON.parse(event.data);

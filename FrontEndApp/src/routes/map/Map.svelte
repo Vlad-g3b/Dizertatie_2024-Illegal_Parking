@@ -13,7 +13,7 @@
     export let infractionsStore: import("svelte/store").Writable<Array<object>>;
     export let list: Array<object>;
     let map: L.Map;
-
+    const apiUrl = import.meta.env.VITE_API_URL;
     let randomPointInPoly = function(polygon) {
     var bounds = polygon.getBounds(); 
     var x_min  = bounds.getEast();
@@ -34,7 +34,7 @@
 }
 
 async function doPost (ep,data) {
-		const res = await fetch('http://172.17.0.7:5000/' + ep, {
+		const res = await fetch(apiUrl + '/' + ep, {
 			method: 'POST',
             headers: {'Accept': 'application/json', 'Content-Type': 'application/json'}, 
 			body: JSON.stringify(data)
@@ -144,7 +144,6 @@ function addFakePoints(heatL: never[][], poll: any){
                 const unsubscribe = infractionsStore.subscribe(
                     (infractions) => {
                         // Clear existing markers
-
                         // Add markers for each infraction
                         infractions.forEach((infraction) => {
                             let marker = L.marker([

@@ -26,6 +26,7 @@
  * ```
  */
 declare module '$env/static/private' {
+	export const VITE_API_URL: string;
 	export const npm_config_user_agent: string;
 	export const NODE_VERSION: string;
 	export const HOSTNAME: string;
@@ -59,6 +60,7 @@ declare module '$env/static/private' {
 	export const INIT_CWD: string;
 	export const EDITOR: string;
 	export const NODE_ENV: string;
+	export const BACKEND_API_URL: string;
 }
 
 /**
@@ -90,6 +92,7 @@ declare module '$env/static/public' {
  */
 declare module '$env/dynamic/private' {
 	export const env: {
+		VITE_API_URL: string;
 		npm_config_user_agent: string;
 		NODE_VERSION: string;
 		HOSTNAME: string;
@@ -123,6 +126,7 @@ declare module '$env/dynamic/private' {
 		INIT_CWD: string;
 		EDITOR: string;
 		NODE_ENV: string;
+		BACKEND_API_URL: string;
 		[key: `PUBLIC_${string}`]: undefined;
 		[key: `${string}`]: string | undefined;
 	}

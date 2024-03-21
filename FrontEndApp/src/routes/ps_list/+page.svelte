@@ -1,13 +1,13 @@
-<script >
+<script lang="ts">
 import { onMount } from 'svelte';
 import Table from './Table.svelte';
 import { writable } from 'svelte/store';
 
+const apiUrl = import.meta.env.VITE_API_URL;
 const infractionsStore = writable([]);
   async function getListItems() {
-  const res = await fetch('http://172.17.0.7:5000/getAllTParkingSites');
+  const res = await fetch(apiUrl + '/getAllTParkingSites');
     if (res.ok) {
-      console.log(res)
         return await res.text();
     } else {
         // Sometimes the API will fail!
@@ -25,7 +25,7 @@ const infractionsStore = writable([]);
 	<p>...waiting</p>
 {:then infractionsStore}
   {#if Table}
-    <Table  {infractionsStore}/>
+    <Table {infractionsStore}/>
   {:else}
     <p>Loading...</p>
   {/if}

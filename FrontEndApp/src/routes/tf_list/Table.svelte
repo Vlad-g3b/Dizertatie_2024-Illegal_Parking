@@ -6,7 +6,8 @@
       myList = JSON.parse(infractionsStore).TrafficViolationList;    
     });
     async function doPost (ep,data) {
-		const res = await fetch('http://172.17.0.7:5000/' + ep, {
+    const apiUrl = import.meta.env.VITE_API_URL;
+		const res = await fetch(apiUrl + '/' + ep, {
 			method: 'POST',
             headers: {'Accept': 'application/json', 'Content-Type': 'application/json'}, 
 			body: JSON.stringify(data)
