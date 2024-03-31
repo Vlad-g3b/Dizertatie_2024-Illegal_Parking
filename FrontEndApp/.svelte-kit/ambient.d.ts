@@ -26,6 +26,9 @@
  * ```
  */
 declare module '$env/static/private' {
+	export const AUTH_SECRET: string;
+	export const GITHUB_CLIENT_ID: string;
+	export const GITHUB_CLIENT_SECRET: string;
 	export const VITE_API_URL: string;
 	export const npm_config_user_agent: string;
 	export const NODE_VERSION: string;
@@ -91,6 +94,9 @@ declare module '$env/static/public' {
  */
 declare module '$env/dynamic/private' {
 	export const env: {
+		AUTH_SECRET: string;
+		GITHUB_CLIENT_ID: string;
+		GITHUB_CLIENT_SECRET: string;
 		VITE_API_URL: string;
 		npm_config_user_agent: string;
 		NODE_VERSION: string;

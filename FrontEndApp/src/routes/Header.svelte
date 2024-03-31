@@ -1,1 +1,0 @@
-<h1>Illegal parking detection</h1>

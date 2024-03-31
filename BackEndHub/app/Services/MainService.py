@@ -1,6 +1,6 @@
 from app.Helper.DBConnection import DBConnection
 import logging
-
+from app.Entities.TrafficViolation import TrafficViolation
 #This should've call another script that handle the DB querys...
 class MainService():
 
@@ -63,7 +63,9 @@ class MainService():
             with connection.cursor() as cursor:
                 cursor.execute(f"Select tf_id,tf_desc,tf_location,tf_ref_parksite,tf_date_ins,tf_date_resolved,tf_resolved from {self.database}.{self.tableNameTF} order by tf_resolved asc, tf_date_resolved desc")
                 print(cursor.rowcount, "records")                
-                outputList = cursor.fetchall()
+                for item in cursor.fetchall():
+                    tf_obj = TrafficViolation(item[0],item[1],item[2],item[3],item[4],item[5],item[6])
+                    outputList.append(tf_obj)                
         return outputList
     
     def getTrafficViolationListUnresolved(self):

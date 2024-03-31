@@ -9,10 +9,16 @@
 	--color-theme-1: #ff3e00;
 	--color-theme-2: #4075a6;
 	--color-text: rgba(0, 0, 0, 0.7);
+	--color-text-2:  rgb(255, 255, 255);
 	--column-width: 42rem;
 	--column-margin-top: 4rem;
 	font-family: var(--font-body);
 	color: var(--color-text);
+	--sidebar-bg-btn-color: #4d4b4b;
+    --sidebar-text-color: #fff;
+    --content-bg-color: #f9f9f9;
+    --content-text-color: #333;
+    --link-hover-color: #ccc;
 }
 
 body {
@@ -104,3 +110,37 @@ button:focus:not(:focus-visible) {
 	width: 1px;
 	white-space: nowrap;
 }
+
+.button-24 {
+	background: var(--sidebar-bg-btn-color);
+	border: 1px solid var(--sidebar-bg-btn-color);
+	box-shadow: rgba(0, 0, 0, 0.1) 1px 2px 4px;
+	box-sizing: border-box;
+	color: var(--sidebar-text-color);
+	cursor: pointer;
+	display: inline-block;
+	font-family: inherit;
+  
+	line-height: 16px;
+	min-height: 40px;
+	outline: 0;
+	padding: 12px 14px;
+	text-align: center;
+	text-rendering: geometricprecision;
+	text-transform: none;
+	user-select: none;
+	-webkit-user-select: none;
+	touch-action: manipulation;
+	vertical-align: middle;
+  }
+  
+  .button-24:hover,
+  .button-24:active {
+	background-color: initial;
+	background-position: 0 0;
+	color: var(--sidebar-text-color);
+  }
+  
+  .button-24:active {
+	opacity: .5;
+  }

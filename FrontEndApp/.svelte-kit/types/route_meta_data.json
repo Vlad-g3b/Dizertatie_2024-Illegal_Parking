@@ -1,8 +1,33 @@
 {
-	"/": [],
-	"/live_feed": [],
-	"/map": [],
-	"/ps_list": [],
-	"/statistics": [],
-	"/tf_list": []
+	"/": [
+		"src/routes/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/admin/dashboard": [
+		"src/routes/+layout.server.ts"
+	],
+	"/live_feed": [
+		"src/routes/+layout.server.ts"
+	],
+	"/map": [
+		"src/routes/+layout.server.ts"
+	],
+	"/ps_list": [
+		"src/routes/+layout.server.ts"
+	],
+	"/signin": [
+		"src/routes/+layout.server.ts"
+	],
+	"/signout": [
+		"src/routes/+layout.server.ts"
+	],
+	"/signup": [
+		"src/routes/+layout.server.ts"
+	],
+	"/statistics": [
+		"src/routes/+layout.server.ts"
+	],
+	"/tf_list": [
+		"src/routes/+layout.server.ts"
+	]
 }

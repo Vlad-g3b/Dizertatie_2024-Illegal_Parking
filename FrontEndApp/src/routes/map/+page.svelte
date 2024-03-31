@@ -5,6 +5,14 @@
      * @type {typeof import("./Map.svelte").default}
      */
     let Map;
+
+  import { goto } from '$app/navigation';
+  import {page} from '$app/stores';  
+  // Check if the user is authenticated
+  const authenticated = $page.data.session == null; 
+  if (authenticated) {
+    goto('/signin'); // Redirect to your login page
+  }
     const apiUrl = import.meta.env.VITE_API_URL;
         const infractionsStore = writable([]);
     async function getListItems() {
