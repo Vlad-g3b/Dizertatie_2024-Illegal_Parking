@@ -48,7 +48,9 @@
         <td>
           {#if tf.resolved == 0}
             <button on:click={() => doPost(tf)}> Resolve... </button>
-          {:else}{/if}
+          {:else}
+            Resolved
+          {/if}
         </td>
       </tr>
     {/each}
