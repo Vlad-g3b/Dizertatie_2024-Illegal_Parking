@@ -7,7 +7,7 @@
 
 <div class="actions">
   {#if $page.data.session != null}
-  Wellcome {$page.data.session.user?.name}
+  Welcome {$page.data.session.user?.name}
   {/if}
 </div>
 </nav>

@@ -1,12 +1,15 @@
-from typing import Union
+from typing import Annotated, Union
+from uu import Error
+from fastapi.security import OAuth2PasswordBearer
 import uvicorn
 from fastapi import FastAPI
-from pydantic import BaseModel
+
 from fastapi import Request, Depends,HTTPException
 from sse_starlette.sse import EventSourceResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from app.Services.MainService import MainService
+import app.Entities.BasicEntities as BE
 import logging
 import asyncio
 import json
@@ -28,13 +31,8 @@ class SSEManager:
         for response in self.subscriptions:
             await response.send_text(f"data: {json.dumps(message)}\n\n")
 
-class TrafficViolation(BaseModel):
-    tf_id: str
-    tf_type: str
-    description: str | None = None
-    location: list | None = None
-    is_resolved: float | None = None
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 sse_manager = SSEManager()
 app = FastAPI()
@@ -64,6 +62,10 @@ async def get_body(request: Request):
     return await request.body()
 
 
+@app.get("/items/")
+async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
+    return {"token": token}
+
 @app.get("/getAllTrafficViolation")
 def getDataFromDb():
     ms = MainService()
@@ -79,39 +81,68 @@ def getDataFromDb2():
     return {'TrafficViolationList' : list_records}
 
 @app.get("/getStats")
-def getDataFromDb2():
+def getDataFromDb3():
     ms = MainService()
     list_records = ms.getTrafficViolationStats() 
     logger.debug(list_records)
     return {'TrafficViolationStats' : list_records}
 
 @app.get("/getAllTParkingSites")
-def getDataFromDb():
+def getDataFromDb4():
     ms = MainService()
     list_records = ms.getParkingSiteList() 
     logger.debug(list_records)
-    return {'ParkingSiteList' : list_records}
+    return {"list" : list_records} # type: ignore
 
 @app.post("/updateResolved")
-def updateTFResolved(tf : TrafficViolation):
+def updateTFResolved(tf : BE.TrafficViolation):
     ms = MainService()
     ms.updateTFResolved(tf.tf_id, tf.is_resolved) 
     logger.debug(tf)
     return tf
 
+@app.post("/getUser" )
+def getUser(user : BE.User):
+    ms = MainService()
+    output = ms.getUserByEmail(user.usr_email) 
+    if output == None:
+        raise HTTPException(status_code=404, detail="User Not Found!")
+    return output
+
+@app.post("/insertUser" )
+def insertUser(user : BE.User):
+    ms = MainService()
+    try:
+        output = ms.insertUser(user) 
+    except Error as e:
+        raise HTTPException(status_code=305, detail="Something went wrong...")
+    if output == None:
+        raise HTTPException(status_code=404, detail="User Not Found!")
+    return output
+
 @app.post("/notify")
 def getDataFromContextBroker(body: bytes = Depends(get_body)):
     global data_to_be_sent, list_of_data_to_be_sent
     data_to_be_sent = body.decode('utf8')
-    list_of_data_to_be_sent.append(data_to_be_sent)
-    logger.info(data_to_be_sent)
+    #list_of_data_to_be_sent.append(data_to_be_sent)
     ms = MainService()
     data_to_insert = json.loads(data_to_be_sent)['data']
     data_to_insert = data_to_insert[0]
-    logger.debug(data_to_insert)
     if data_to_insert['type'] == 'TrafficViolation':
         try:
             ms.insertTrafficViolation(data_to_insert['id'], data_to_insert['description']['value'],json.dumps(data_to_insert['location']['value']['coordinates']), json.dumps(data_to_insert['seeAlso']['value'][0]))
+            value = {"TrafficViolationList": [
+                        {
+                            "id": data_to_insert['id'],
+                            "description": data_to_insert['description']['value'],
+                            "location": data_to_insert['location']['value']['coordinates'],
+                            "resolved" : 0,
+                            "type": "TrafficViolation"
+                            }
+                    ]
+                }
+            list_of_data_to_be_sent.append(json.dumps(value))
+            logger.debug(list_of_data_to_be_sent)
         except Exception as e:
             print(e)
             #TODO: maybe do something later...
@@ -126,7 +157,7 @@ def getDataFromContextBroker(body: bytes = Depends(get_body)):
 
 
 async def sse_generator():
-    global data_to_be_sent, cnt
+    global list_of_data_to_be_sent, cnt
     deb = False
     if deb is True:
         while True:
@@ -146,7 +177,9 @@ async def sse_generator():
                     #message = {'id': cnt,'data': 'data_body'}
                     #message['data'] = item
                     #yield f"data: {json.dumps(message)}\n\n"
-                    item = json.loads(item)['data']
+                    logger.debug("AICI")
+                    logger.debug(item)
+                    item = json.loads(item)
                     yield f"data: {json.dumps(item)}\n\n"
             await asyncio.sleep(1)
         # Adjust the sleep interval as needed

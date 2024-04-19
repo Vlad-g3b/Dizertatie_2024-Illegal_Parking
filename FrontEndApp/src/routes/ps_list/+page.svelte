@@ -1,34 +1,25 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import Table from './Table.svelte';
-import { writable } from 'svelte/store';
+  import Table from "./Table.svelte";
+  import Spinner from "../../lib/components/Spinner.svelte";
+  import { onMount } from "svelte";
+  import { writable } from "svelte/store";
+  import type { PageData } from "./$types";
 
-const apiUrl = import.meta.env.VITE_API_URL;
-const infractionsStore = writable([]);
-  async function getListItems() {
-  const res = await fetch(apiUrl + '/getAllTParkingSites');
-    if (res.ok) {
-        return await res.text();
-    } else {
-        // Sometimes the API will fail!
-        throw new Error('Request failed');
-    }
-  }
+  const ps_store = writable(null);
+  export let data: PageData;
 
+  onMount(async () => {
+    ps_store.set(data.parkingSites);
+  });
 </script>
+
 <title>ParkingSite</title>
 <header>
-    <h1>Parking Sites</h1>
+  <h1>Parking Sites</h1>
 </header>
 
-{#await getListItems()}
-	<p>...waiting</p>
-{:then infractionsStore}
-  {#if Table}
-    <Table {infractionsStore}/>
-  {:else}
-    <p>Loading...</p>
-  {/if}
-{:catch error}
-	<p style="color: red">{error.message}</p>
-{/await}
+{#if $ps_store !== null}
+  <Table {ps_store} />
+{:else}
+  <Spinner />
+{/if}

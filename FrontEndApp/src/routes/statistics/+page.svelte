@@ -1,34 +1,24 @@
-<script >
-import { onMount } from 'svelte';
-import Chart from '../components/Chart.svelte';
-import { writable } from 'svelte/store';
-const apiUrl = import.meta.env.VITE_API_URL;
+<script lang="ts">
+  import Chart from "../../lib/components/Chart.svelte";
+  import { writable } from "svelte/store";
+  import type { PageData } from "./$types";
+  import { onMount } from "svelte";
+  import Spinner from "$lib/components/Spinner.svelte";
+  const infractionsStore = writable(null);
+  export let data: PageData;
 
-const infractionsStore = writable([]);
-  async function getListItems() {
-  const res = await fetch( apiUrl + '/getStats');
-    if (res.ok) {
-        return await res.text();
-    } else {
-        // Sometimes the API will fail!
-        throw new Error('Request failed');
-    }
-  }
-
+  onMount(async () => {
+    infractionsStore.set(data.stats);
+  });
 </script>
+
 <title>Statistics</title>
 <header>
-    <h1>Statistics</h1>
+  <h1>Statistics</h1>
 </header>
 
-{#await getListItems()}
-	<p>...waiting</p>
-{:then infractionsStore}
-  {#if Chart}
-    <Chart  {infractionsStore}/>
-  {:else}
-    <p>Loading...</p>
-  {/if}
-{:catch error}
-	<p style="color: red">{error.message}</p>
-{/await}
+{#if $infractionsStore !== null}
+  <Chart {infractionsStore} />
+{:else}
+  <Spinner />
+{/if}

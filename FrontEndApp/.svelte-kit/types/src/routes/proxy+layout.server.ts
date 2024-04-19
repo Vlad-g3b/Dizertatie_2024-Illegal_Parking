@@ -1,8 +1,7 @@
 // @ts-nocheck
-import type { LayoutServerLoad } from './$types';
-
+import type { LayoutServerLoad } from "./$types";
 export const load = async (event: Parameters<LayoutServerLoad>[0]) => {
   return {
-    session: await event.locals.auth()
+    session: await event.locals.auth(),
   };
 };

@@ -10,24 +10,19 @@
 		"src/routes/+layout.server.ts"
 	],
 	"/map": [
+		"src/routes/map/+page.server.ts",
 		"src/routes/+layout.server.ts"
 	],
 	"/ps_list": [
-		"src/routes/+layout.server.ts"
-	],
-	"/signin": [
-		"src/routes/+layout.server.ts"
-	],
-	"/signout": [
-		"src/routes/+layout.server.ts"
-	],
-	"/signup": [
+		"src/routes/ps_list/+page.server.ts",
 		"src/routes/+layout.server.ts"
 	],
 	"/statistics": [
+		"src/routes/statistics/+page.server.ts",
 		"src/routes/+layout.server.ts"
 	],
 	"/tf_list": [
+		"src/routes/tf_list/+page.server.ts",
 		"src/routes/+layout.server.ts"
 	]
 }

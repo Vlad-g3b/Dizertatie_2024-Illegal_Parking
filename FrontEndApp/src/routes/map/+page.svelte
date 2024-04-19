@@ -1,70 +1,42 @@
-<script>
-    import { onMount } from "svelte";
-    import { writable } from 'svelte/store';
-    /**
-     * @type {typeof import("./Map.svelte").default}
-     */
-    let Map;
-
-  import { goto } from '$app/navigation';
-  import {page} from '$app/stores';  
-  // Check if the user is authenticated
-  const authenticated = $page.data.session == null; 
-  if (authenticated) {
-    goto('/signin'); // Redirect to your login page
-  }
-    const apiUrl = import.meta.env.VITE_API_URL;
-        const infractionsStore = writable([]);
-    async function getListItems() {
-    const res = await fetch(apiUrl + '/getAllUnresolvedTrafficViolation');
-      if (res.ok) {
-          return await res.text();
-      } else {
-          // Sometimes the API will fail!
-          throw new Error('Request failed');
-      }
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { writable } from "svelte/store";
+  import type { PageData } from "./$types";
+  import Spinner from "$lib/components/Spinner.svelte";
+  let Map: any;
+  const infractionsStore = writable();
+  export let data: PageData;
+  onMount(() => {
+    infractionsStore.set(data.unresolvedTf);
+    if (typeof window !== "undefined") {
+      import("./Map.svelte")
+        .then((module) => {
+          Map = module.default;
+        })
+        .catch((error) => {
+          console.error("Error importing Map component:", error);
+        });
     }
+    const eventSource = new EventSource("http://0.0.0.0:5000/sse");
+    eventSource.onmessage = (event) => {
+      // Handle incoming SSE data
+      console.log(event.data);
+      infractionsStore.set(event.data);
+    };
 
-    onMount(() => {
-        if (typeof window !== 'undefined') {
-      import('./Map.svelte').then(module => {
-        Map = module.default;
-      }).catch(error => {
-        console.error('Error importing Map component:', error);
-      });
-    }
-        const eventSource = new EventSource(apiUrl + "/sse");
-        eventSource.onmessage = (event) => {
-            // Handle incoming SSE data
-            const infractions = JSON.parse(event.data);
-            const infractionsTF = infractions.filter(item => item.type == 'TrafficViolation')
-            infractionsStore.set(infractionsTF);
-            console.log(infractionsTF);
-        };
-
-        eventSource.onerror = (error) => {
-            console.error("SSE Error:", error);
-            // Handle errors
-        };
-
-        return () => {
-            // Cleanup on component destruction
-            console.log("return");
-            eventSource.close();
-        };
-    });
+    eventSource.onerror = (error) => {
+      console.error("SSE Error:", error);
+      // Handle errors
+    };
+  });
 </script>
 
-
-
-{#await getListItems()}
-	<p>...waiting</p>
-{:then list}
+{#if $infractionsStore !== null}
   {#if Map}
-    <Map {infractionsStore} {list} latitude={38.248747} longitude={21.738999} />
+    <Map {infractionsStore}  latitude={38.248747} longitude={21.738999} />
   {:else}
-    <p>Loading...</p>
+    <Spinner />
   {/if}
-{:catch error}
-	<p style="color: red">{error.message}</p>
-{/await}
+{:else}
+  <Spinner />
+{/if}

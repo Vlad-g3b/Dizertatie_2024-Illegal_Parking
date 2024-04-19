@@ -29,7 +29,7 @@ declare module '$env/static/private' {
 	export const AUTH_SECRET: string;
 	export const GITHUB_CLIENT_ID: string;
 	export const GITHUB_CLIENT_SECRET: string;
-	export const VITE_API_URL: string;
+	export const VITE_API_SERVER_URL: string;
 	export const npm_config_user_agent: string;
 	export const NODE_VERSION: string;
 	export const HOSTNAME: string;
@@ -75,7 +75,7 @@ declare module '$env/static/private' {
  * ```
  */
 declare module '$env/static/public' {
-	
+	export const PUBLIC_VITE_API_URL: string;
 }
 
 /**
@@ -97,7 +97,7 @@ declare module '$env/dynamic/private' {
 		AUTH_SECRET: string;
 		GITHUB_CLIENT_ID: string;
 		GITHUB_CLIENT_SECRET: string;
-		VITE_API_URL: string;
+		VITE_API_SERVER_URL: string;
 		npm_config_user_agent: string;
 		NODE_VERSION: string;
 		HOSTNAME: string;
@@ -150,6 +150,7 @@ declare module '$env/dynamic/private' {
  */
 declare module '$env/dynamic/public' {
 	export const env: {
+		PUBLIC_VITE_API_URL: string;
 		[key: `PUBLIC_${string}`]: string | undefined;
 	}
 }

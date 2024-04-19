@@ -1,22 +1,17 @@
 <script lang="ts">
   import Table from "./Table.svelte";
-  import Spinner from "../components/Spinner.svelte";
+  import Spinner from "../../lib/components/Spinner.svelte";
   import { onMount } from "svelte";
-  const apiUrl = import.meta.env.VITE_API_URL;
-  let tf_list: any;
+  import { writable } from "svelte/store";
+  import type { PageData } from "./$types";
+
+  const tf_store = writable(null);
+  export let data: PageData;
+
   onMount(async () => {
-    tf_list = await getAllTrafficViolation();
-});
-  async function getAllTrafficViolation() {
-    const res = await fetch(apiUrl + "/getAllTrafficViolation");
-    if (res.ok) {
-      const data = await res.json();
-      return data;
-    } else {
-      // Sometimes the API will fail!
-      throw new Error("Request failed");
-    }
-  }
+    tf_store.set(data.trafficViolations);
+    console.log("call onMount?");
+  });
 </script>
 
 <title>TrafficViolation</title>
@@ -24,9 +19,8 @@
   <h1>Manage TrafficViolation</h1>
 </header>
 
-{#await getAllTrafficViolation()}
-  <p>Loading ...</p>
+{#if $tf_store !== null}
+  <Table {tf_store} />
+{:else}
   <Spinner />
-{:then tf_list}
-    <Table {tf_list} />
-  {/await}
+{/if}

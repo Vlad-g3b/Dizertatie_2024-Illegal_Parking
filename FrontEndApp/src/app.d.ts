@@ -1,16 +1,20 @@
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
-type User = {
-  id: number;
-  email: string;
-  role: string;
-};
+import type { Session as AuthSession } from "@auth/core/types";
+
+import { type AdapterUser, type User } from "@auth/sveltekit";
+
+declare module "@auth/sveltekit" {
+  interface User extends AdapterUser {
+    role: string;
+  }
+}
+
 declare global {
   namespace App {
-    interface Locals {
-      user: User | null;
-      something: String | null;
-    }
+    interface Locals {}
+    interface Session extends AuthSession {}
+
     // interface Error {}
     // interface Locals {}
     // interface PageData {}
@@ -19,7 +23,5 @@ declare global {
   }
 }
 
+export {};
 // Define an interface for the structure of each infraction
-// Define the infractionsStore with the specified type
-
-export { };

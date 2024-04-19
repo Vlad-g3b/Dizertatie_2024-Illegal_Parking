@@ -1,61 +1,53 @@
 <script lang="ts">
-  import { writable } from "svelte/store";
-  //export let infractionsStore: import("svelte/store").Writable<Array<object>>;
-  export let tf_list: any;
-  const response = writable();
-  async function doPost(tf: any) {
-    const apiUrl = import.meta.env.VITE_API_URL;
-    let data: { tf_id: any; tf_type: string; is_resolved: number } = {
-      tf_id: tf.id,
-      tf_type: "TrafficViolation",
-      is_resolved: 1,
-    };
-    const res = await fetch(apiUrl + "/updateResolved", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-    const json = await res.json();
-    response.set(data);
-  }
+  import { onMount } from "svelte";
+  export let tf_store: any;
+  let tf_list: any;
+
+  const unsubscribe = tf_store.subscribe((data: any) => {
+    tf_list = data;
+  });
+
+  onMount(() => {
+    return unsubscribe;
+  });
 </script>
 
-{#if $response}
-  <p>Response from server: {$response} {console.log({ $response })}</p>
-{/if}
-<table>
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Description</th>
-      <th>Location</th>
-      <th>Recorded Date</th>
-      <th>Resolved Date</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    {#each tf_list.TrafficViolationList as tf}
+<form method="POST">
+  <table>
+    <thead>
       <tr>
-        <td>{tf.id}</td>
-        <td>{tf.description}</td>
-        <td>{tf.location}</td>
-        <td>{tf.date_ins}</td>
-        <td>{tf.date_res}</td>
-        <td>
-          {#if tf.resolved == 0}
-            <button on:click={() => doPost(tf)}> Resolve... </button>
-          {:else}
-            Resolved
-          {/if}
-        </td>
+        <th>ID</th>
+        <th>Description</th>
+        <th>Location</th>
+        <th>Recorded Date</th>
+        <th>Resolved Date</th>
+        <th>Status</th>
       </tr>
-    {/each}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {#each tf_list.TrafficViolationList as tf}
+        <tr>
+          <td>{tf.id}</td>
+          <td>{tf.description}</td>
+          <td>{tf.location}</td>
+          <td>{tf.date_ins}</td>
+          <td>{tf.date_res}</td>
+          <td>
+            <form method="post" action="?/resolveTf">
+              {#if tf.resolved == 0}
+                <input type="hidden" name="id" value={tf.id} />
+                <input type="submit" value="Resolve..." />
+                <!-- <button on:click={() => doPost(tf)}> Resolve... </button> -->
+              {:else}
+                Resolved
+              {/if}
+            </form>
+          </td>
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+</form>
 
 <style>
   table {
