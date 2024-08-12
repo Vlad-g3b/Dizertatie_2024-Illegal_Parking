@@ -27,13 +27,16 @@
     eventSource.onerror = (error) => {
       console.error("SSE Error:", error);
       // Handle errors
+      eventSource.close();
     };
+
+    
   });
 </script>
 
 {#if $infractionsStore !== null}
   {#if Map}
-    <Map {infractionsStore}  latitude={38.248747} longitude={21.738999} />
+    <Map {infractionsStore} latitude={38.248747} longitude={21.738999} />
   {:else}
     <Spinner />
   {/if}

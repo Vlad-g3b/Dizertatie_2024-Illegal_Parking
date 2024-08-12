@@ -11,7 +11,8 @@ class TrafficViolation(BaseModel):
     description: str | None = None
     location: list | None = None
     is_resolved: float | None = None
-
+    username : str | None = None
+    
 class User(BaseModel):
     usr_id: int | None = None
     usr_name: str | None = None
@@ -25,6 +26,10 @@ class ParkingSite(BaseModel):
     ps_location: str | None = None
     ps_max_parking_spots: int | None = None
 
+class Camera(BaseModel):
+    cm_id: str
+    cm_ps_id: str | None = None
+    cm_polygon: str | None = None
 
 class ParkingSiteList(BaseModel):
     parking_list : list | None = None

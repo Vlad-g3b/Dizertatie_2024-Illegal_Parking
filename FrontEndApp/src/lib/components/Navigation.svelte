@@ -1,109 +1,83 @@
-<script>
+<script lang="ts">
   import "../../routes/styles.css";
   import { page } from "$app/stores";
   import { signIn, signOut } from "@auth/sveltekit/client";
+  import {
+    Sidebar,
+    SidebarGroup,
+    SidebarItem,
+    SidebarWrapper,
+    Avatar,
+    Button,
+  } from "flowbite-svelte";
+  import {
+    ChartPieSolid,
+    GlobeOutline,
+    VideoCameraOutline,
+    ExclamationCircleSolid,
+    MapPinAltOutline,
+    ScaleBalancedOutline,
+  } from "flowbite-svelte-icons";
+  $: activeUrl = $page.url.pathname;
+  let divClass =
+    "overflow-y-auto py-4 px-3 bg-custom-brown size-full dark:bg-gray-800";
+  let activeClass =
+    "flex items-center p-2 text-base font-normal text-primary-900 bg-primary-200 rounded-lg hover:bg-primary-100";
+  let nonActiveClass =
+    "flex items-center p-2 text-base font-normal text-white rounded-lg hover:text-custom-brown hover:bg-cutom-brown-light";
 </script>
 
-<div class="sidebar">
-  <!-- HTML !-->
-  <div class="container-box">
-    {#if $page.data.session != null}
-      <div class="box">
-        <img
-          class="rounded-image"
-          alt="profile-pic"
-          src={$page.data.session.user?.image}
-        />
-      </div>
-      <div class="box">
-        <div class="box text-column">
-          Welcome {$page.data.session.user?.name}
+<Sidebar {activeUrl} {activeClass} {nonActiveClass}>
+  <SidebarWrapper {divClass}>
+    <SidebarGroup>
+      {#if $page.data.session != null}
+        <div class="flex items-center space-x-4 rtl:space-x-reverse">
+          <Avatar src={$page.data.session.user?.image} rounded />
+          <div class="space-y-1 font-medium text-white">
+            <div class="text-md font-bold">{$page.data.session.user?.name}</div>
+            <div class="text-sm">Welcome!</div>
+          </div>
+          <div class="space-y-1">
+            <Button on:click={() => signOut({ callbackUrl: $page.url.origin })}>
+              Sign Out
+            </Button>
+          </div>
         </div>
-        <div class="container-box">
-          <button
-            class="button-24"
-            on:click={() => signOut({ callbackUrl: $page.url.origin })}
-            >Sign Out</button
-          >
+      {:else}
+        <div class="lex items-center space-x-4 rtl:space-x-reverse">
+          <Button on:click={() => signIn("github")}>Sign In</Button>
         </div>
-      </div>
-    {:else}
-      <div class="box">
-        <button class="button-24" on:click={() => signIn("github")}
-          >Sign In
-        </button>
-      </div>
-    {/if}
-  </div>
-  <h2>Navigation</h2>
-  <ul>
-    <li><a href="/map">Live map</a></li>
-    <li><a href="/live_feed">Live Feed</a></li>
-    <li><a href="/tf_list">Traffic Violations</a></li>
-    <li><a href="/ps_list">Parking Sites</a></li>
-    <li><a href="/statistics">Statistics</a></li>
-  </ul>
-</div>
-
-<style>
-  .container-box {
-    display: flex;
-    overflow: hidden;
-    padding: 10px;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-
-  .box {
-    flex: 1; /* To distribute space equally */
-  }
-
-  .sidebar {
-    width: var(--sidebar-width);
-    background-color: var(--sidebar-bg-color);
-    color: var(--sidebar-text-color);
-    padding: 20px;
-  }
-
-  .sidebar h2 {
-    margin-bottom: 20px;
-  }
-
-  .sidebar ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .sidebar li {
-    margin-bottom: 10px;
-  }
-
-  .sidebar a {
-    display: block;
-    padding: 10px;
-    color: inherit;
-    text-decoration: none;
-    transition: color var(--transition-speed);
-  }
-
-  .sidebar a:hover {
-    background-color: var(--link-hover-color);
-  }
-  .rounded-image {
-    max-width: 80%; /* Ensures the image doesn't exceed the width of its container */
-    max-height: 80%; /* Ensures the image doesn't exceed the height of its container */
-    width: auto; /* Allows the image to scale proportionally */
-    height: auto; /* Allows the image to scale proportionally */
-    border-radius: 50%; /* Makes the image round */
-    overflow: hidden; /* Ensures the border-radius is applied correctly */
-  }
-
-  @media screen and (max-width: 768px) {
-    .sidebar {
-      width: 100%;
-      text-align: center;
-    }
-  }
-</style>
+      {/if}
+      <SidebarItem label="Dashboard" href="/">
+        <svelte:fragment slot="icon">
+          <ChartPieSolid class="w-6 h-6" />
+        </svelte:fragment>
+      </SidebarItem>
+      <SidebarItem label="Live Map" href="/map">
+        <svelte:fragment slot="icon">
+          <GlobeOutline class="w-6 h-6" />
+        </svelte:fragment>
+      </SidebarItem>
+      <SidebarItem label="Live Feed" href="/live_feed">
+        <svelte:fragment slot="icon">
+          <VideoCameraOutline class="w-6 h-6" />
+        </svelte:fragment>
+      </SidebarItem>
+      <SidebarItem label="Traffic Violations" href="/tf_list">
+        <svelte:fragment slot="icon">
+          <ExclamationCircleSolid class="w-6 h-6" />
+        </svelte:fragment>
+      </SidebarItem>
+      <SidebarItem label="Parking Sites" href="/ps_list">
+        <svelte:fragment slot="icon">
+          <MapPinAltOutline class="w-6 h-6" />
+        </svelte:fragment>
+      </SidebarItem>
+      <SidebarItem label="Statistics" href="/statistics">
+        <svelte:fragment slot="icon">
+          <ScaleBalancedOutline class="w-6 h-6" />
+        </svelte:fragment>
+      </SidebarItem>
+    </SidebarGroup>
+  </SidebarWrapper>
+</Sidebar>

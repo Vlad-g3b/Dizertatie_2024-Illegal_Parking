@@ -2,7 +2,7 @@ from sqlite3 import IntegrityError
 from uu import Error
 
 from fastapi import HTTPException
-from app.Entities.BasicEntities import ParkingSite, User
+from app.Entities.BasicEntities import Camera, ParkingSite, User
 from app.Helper.DBConnection import DBConnection
 import logging
 from app.Entities.TrafficViolation import TrafficViolation
@@ -13,6 +13,7 @@ class MainService():
     def __init__(self):
         self.data = None
         self.tableNameTF = 'TrafficViolation'
+        self.tableNameCM = 'Cameras'
         self.tableNamePS = 'ParkingSite'
         self.tableNameUSR = 'Users'
         self.database = 'OnStreetParking'
@@ -20,6 +21,14 @@ class MainService():
  ######################
  #      Insert        #
  ######################
+ 
+    def insertOrUpdatePolygon(self, cm_id, cm_ps_id, cm_polygon):
+        db = DBConnection()
+        with db.getConnection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(f"Insert into {self.database}.{self.tableNameCM} (cm_id, cm_ps_id, cm_polygon) values (%s,%s,%s) ON DUPLICATE KEY UPDATE cm_polygon = %s ", (cm_id,cm_ps_id,cm_polygon,cm_polygon))
+                print(cursor.rowcount, "record inserted.")                
+            connection.commit()
  
     def insertTrafficViolation(self, tf_id, tf_desc, tf_location, tf_ref):
         db = DBConnection()
@@ -77,6 +86,28 @@ class MainService():
                     return User(**output) #type: ignore
         return
 
+    def getCameraById(self, id):
+        db = DBConnection()
+        output = None
+        with db.getConnection() as connection:
+            with connection.cursor(dictionary=True) as cursor:
+                cursor.execute(f"Select cm_id, cm_ps_id, cm_polygon from {self.database}.{self.tableNameCM} where cm_id = %s ", (id,))
+                print(cursor.rowcount, "records")                
+                output = cursor.fetchone()
+                if output:
+                    return Camera(**output) #type: ignore
+        return
+
+    def getAllCameras(self):
+        db = DBConnection()
+        output = None
+        with db.getConnection() as connection:
+            with connection.cursor(dictionary=True) as cursor:
+                cursor.execute(f"Select cm_id, cm_ps_id, cm_polygon from {self.database}.{self.tableNameCM}",)
+                print(cursor.rowcount, "records")                
+                outputList = cursor.fetchall()
+        return outputList #type: ignore
+
     def getTrafficViolationStats(self):
         db = DBConnection()
         outputList = []
@@ -92,10 +123,10 @@ class MainService():
         outputList = []
         with db.getConnection() as connection:
             with connection.cursor() as cursor:
-                cursor.execute(f"Select tf_id,tf_desc,tf_location,tf_ref_parksite,tf_date_ins,tf_date_resolved,tf_resolved from {self.database}.{self.tableNameTF} order by tf_resolved asc, tf_date_resolved desc")
+                cursor.execute(f"Select tf_id,tf_desc,tf_location,tf_ref_parksite,tf_date_ins,tf_date_resolved,tf_resolved,tf_user_name from {self.database}.{self.tableNameTF} order by tf_resolved asc, tf_date_resolved desc")
                 print(cursor.rowcount, "records")                
                 for item in cursor.fetchall():
-                    tf_obj = TrafficViolation(item[0],item[1],item[2],item[3],item[4],item[5],item[6]) # type: ignore
+                    tf_obj = TrafficViolation(item[0],item[1],item[2],item[3],item[4],item[5],item[6],item[7]) # type: ignore
                     outputList.append(tf_obj)                
         return outputList
     
@@ -104,10 +135,10 @@ class MainService():
         outputList = []
         with db.getConnection() as connection:
             with connection.cursor() as cursor:
-                cursor.execute(f"Select tf_id,tf_desc,tf_location,tf_ref_parksite,tf_date_ins,tf_date_resolved,tf_resolved from {self.database}.{self.tableNameTF} where tf_resolved = 0 order by tf_resolved asc")
+                cursor.execute(f"Select tf_id,tf_desc,tf_location,tf_ref_parksite,tf_date_ins,tf_date_resolved,tf_resolved,tf_user_name from {self.database}.{self.tableNameTF} where tf_resolved = 0 order by tf_resolved asc")
                 print(cursor.rowcount, "records")                
                 for item in cursor.fetchall():
-                    tf_obj = TrafficViolation(item[0],item[1],item[2],item[3],item[4],item[5],item[6]) # type: ignore
+                    tf_obj = TrafficViolation(item[0],item[1],item[2],item[3],item[4],item[5],item[6],item[7]) # type: ignore
                     outputList.append(tf_obj)               
         return outputList
            
@@ -116,7 +147,7 @@ class MainService():
         outputList = []
         with db.getConnection() as connection:
             with connection.cursor() as cursor:
-                cursor.execute(f"Select tf_id,tf_desc,tf_location,tf_ref_parksite,tf_date_ins,tf_date_resolved,tf_resolved from {self.database}.{self.tableNameTF} where tf_ref_parksite = %s ", (ps_id,))
+                cursor.execute(f"Select tf_id,tf_desc,tf_location,tf_ref_parksite,tf_date_ins,tf_date_resolved,tf_resolved, tf_user_name from {self.database}.{self.tableNameTF} where tf_ref_parksite = %s ", (ps_id,))
                 print(cursor.rowcount, "records")                
                 outputList = cursor.fetchall()
         return outputList
@@ -149,10 +180,10 @@ class MainService():
  #      Update        #
  ######################
     
-    def updateTFResolved(self, tf_id,tf_resolved):
+    def updateTFResolved(self, tf_id,tf_resolved, tf_username):
         db = DBConnection()
         with db.getConnection() as connection:
             with connection.cursor() as cursor:
-                cursor.execute(f"update {self.database}.{self.tableNameTF} set tf_resolved = {tf_resolved}, tf_date_resolved = now() where tf_id = %s ", (tf_id,))
+                cursor.execute(f"update {self.database}.{self.tableNameTF} set tf_resolved = {tf_resolved}, tf_date_resolved = now(), tf_user_name = %s where tf_id = %s ", (tf_username,tf_id,))
                 print(cursor.rowcount, "records")                
             connection.commit()

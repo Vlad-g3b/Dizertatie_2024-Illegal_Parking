@@ -39,11 +39,46 @@ export async function createUserProfile(
   return null;
 }
 
-export async function doUpdateResolved(id: string | undefined) {
-  let data: { tf_id: any; tf_type: string; is_resolved: number } = {
+export async function insertOrUpdatePolygon(
+  id: number,
+  ps_id: string | undefined,
+  cm_polygon: string | undefined,
+  username: undefined | string | null
+) {
+  try {
+    const res = await fetch(VITE_API_SERVER_URL + "/insertOrUpdatePolygon", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        cm_id: id,
+        cm_ps_id: ps_id,
+        cm_polygon: cm_polygon,
+      }),
+    });
+    console.log("User " + username + " inserted " + cm_polygon);
+    return await res;
+  } catch (error) {
+    console.error(error);
+  }
+  return null;
+}
+
+export async function doUpdateResolved(
+  id: string | undefined,
+  username: string | null | undefined
+) {
+  let data: {
+    tf_id: any;
+    tf_type: string;
+    is_resolved: number;
+    username: string | undefined | null;
+  } = {
     tf_id: id,
     tf_type: "TrafficViolation",
     is_resolved: 1,
+    username: username,
   };
   const res = await fetch(VITE_API_SERVER_URL + "/updateResolved", {
     method: "POST",
@@ -62,6 +97,42 @@ export async function doUpdateResolved(id: string | undefined) {
 export async function getAllTrafficViolation() {
   try {
     const res = await fetch(VITE_API_SERVER_URL + "/getAllTrafficViolation");
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    } else {
+      throw new Error("Request failed");
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+}
+
+export async function getPolygon(cm_id: number) {
+  try {
+    const res = await fetch(VITE_API_SERVER_URL + "/getPolygon", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        cm_id: cm_id,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    } else {
+      throw new Error("Request failed");
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+}
+
+export async function getAllPolygons() {
+  try {
+    const res = await fetch(VITE_API_SERVER_URL + "/getAllPolygons");
     if (res.ok) {
       const data = await res.json();
       return data;

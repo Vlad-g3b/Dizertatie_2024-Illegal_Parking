@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { Button } from "flowbite-svelte";
   export let tf_store: any;
   let tf_list: any;
 
@@ -21,6 +22,7 @@
         <th>Location</th>
         <th>Recorded Date</th>
         <th>Resolved Date</th>
+        <th>Resolved By</th>
         <th>Status</th>
       </tr>
     </thead>
@@ -29,14 +31,17 @@
         <tr>
           <td>{tf.id}</td>
           <td>{tf.description}</td>
-          <td>{tf.location}</td>
+          <td>
+            <a href="https://www.google.com/maps/place/{tf.location}"> View </a>
+          </td>
           <td>{tf.date_ins}</td>
           <td>{tf.date_res}</td>
+          <td>{tf.username}</td>
           <td>
             <form method="post" action="?/resolveTf">
               {#if tf.resolved == 0}
                 <input type="hidden" name="id" value={tf.id} />
-                <input type="submit" value="Resolve..." />
+                <Button pill type="submit">Resolve...</Button>
                 <!-- <button on:click={() => doPost(tf)}> Resolve... </button> -->
               {:else}
                 Resolved

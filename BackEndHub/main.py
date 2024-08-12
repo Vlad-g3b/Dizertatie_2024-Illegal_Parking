@@ -1,9 +1,10 @@
+from pickle import NONE
 from typing import Annotated, Union
 from uu import Error
 from fastapi.security import OAuth2PasswordBearer
 import uvicorn
 from fastapi import FastAPI
-
+from starlette.types import Receive, Scope, Send
 from fastapi import Request, Depends,HTTPException
 from sse_starlette.sse import EventSourceResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -97,7 +98,7 @@ def getDataFromDb4():
 @app.post("/updateResolved")
 def updateTFResolved(tf : BE.TrafficViolation):
     ms = MainService()
-    ms.updateTFResolved(tf.tf_id, tf.is_resolved) 
+    ms.updateTFResolved(tf.tf_id, tf.is_resolved, tf.username) 
     logger.debug(tf)
     return tf
 
@@ -108,6 +109,28 @@ def getUser(user : BE.User):
     if output == None:
         raise HTTPException(status_code=404, detail="User Not Found!")
     return output
+
+@app.post("/getPolygon" )
+def getPolygon(cam : BE.Camera):
+    ms = MainService()
+    output = ms.getCameraById(cam.cm_id) 
+    if output == None:
+        raise HTTPException(status_code=404, detail="Camera Details Not Found!")
+    return output
+
+@app.get("/getAllPolygons" )
+def getAllPolygons():
+    ms = MainService()
+    output = ms.getAllCameras() 
+    if output == None:
+        raise HTTPException(status_code=404, detail="Error!")
+    return output
+
+@app.post("/insertOrUpdatePolygon" )
+def insertOrUpdatePolygon(cam : BE.Camera):
+    ms = MainService()
+    print(cam)
+    ms.insertOrUpdatePolygon(cam.cm_id, cam.cm_ps_id, cam.cm_polygon) 
 
 @app.post("/insertUser" )
 def insertUser(user : BE.User):
@@ -215,4 +238,9 @@ async def sse_endpoint(request: Request):
     response = StreamingResponse(sse_generator(), media_type="text/event-stream")
     sse_manager.add_subscription(response)
     logger.info(len(sse_manager.subscriptions))
+    # Attach the disconnect event handler
+    if await request.is_disconnected():
+        sse_manager.remove_subscription(response)
+        logger.debug("remove sub")
+    
     return response

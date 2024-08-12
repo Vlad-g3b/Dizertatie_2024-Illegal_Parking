@@ -1,28 +1,27 @@
 <script>
+  import "../app.css";
   import "./styles.css";
   import { SvelteToast } from "@zerodevx/svelte-toast";
   import Navigation from "../lib/components/Navigation.svelte";
 </script>
 
-<SvelteToast />
-<div class="container">
+<SvelteToast></SvelteToast>
+<div class="max-w-full container">
   <!-- Sidebar -->
-  <Navigation />
+  <Navigation></Navigation>
   <!-- Main content area -->
   <div class="content">
-    <slot />
+    <slot></slot>
   </div>
-
-  
 </div>
 
 <footer class="footer">
-  <p>&copy; 2022 OnStreetParking. All rights reserved.</p>
+  <p>© 2022 OnStreetParking. All rights reserved.</p>
 </footer>
 
 <style>
   :root {
-    --sidebar-width: 250px;
+    --sidebar-width: 300px;
     --sidebar-bg-color: #333;
     --sidebar-text-color: #fff;
     --content-bg-color: #f9f9f9;

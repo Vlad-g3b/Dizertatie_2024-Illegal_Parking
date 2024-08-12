@@ -3,10 +3,14 @@
 		"src/routes/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
+	"/admin/api/get_polygon": [
+		"src/routes/admin/api/get_polygon/+server.ts"
+	],
 	"/admin/dashboard": [
 		"src/routes/+layout.server.ts"
 	],
 	"/live_feed": [
+		"src/routes/live_feed/+page.server.ts",
 		"src/routes/+layout.server.ts"
 	],
 	"/map": [

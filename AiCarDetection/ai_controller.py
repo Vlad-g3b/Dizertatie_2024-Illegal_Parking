@@ -1,6 +1,9 @@
+from email.quoprimime import body_check
+from os import urandom
 import cv2
 import numpy as np
 import supervision as sv
+from sympy import principal_branch
 import ultralytics
 import time
 import calendar
@@ -15,12 +18,21 @@ from Entities.OnStreetParking import OnStreetParking
 from queue import Empty, Queue
 from threading import Thread
 import Core.helper as hp
+import json
 
 previous_bbox = None
 parked = []
 cars = {}
 time_between_checks = 10
 time_counter = 0
+
+def doPost(url, body, header={"Content-Type": "application/json",}):
+    try:
+        response = requests.post(url="http://localhost:5000/" + url, data=json.dumps(body), headers=header)
+        print(response.json())
+    except Exception as e:
+        print(e)
+    return response.json()
 
 def consumer(queue):
     while True:
@@ -65,7 +77,6 @@ parking_site.id = "ParkingSite_" + str(time_stamp)
 parking_site.description = "To Be Set Street + description"
 parking_site.setData(parking_site.getDictObj())
 response = parking_site.doPost()
-print(response)
 #Create a queue for notifications
 queue = Queue()
 consumer_thread = Thread(target=consumer,args=(queue,),daemon=True)
@@ -74,8 +85,11 @@ consumer_thread.start()
 polygon = []
 points = []
 zone = None
-
-while cap.isOpened():
+resp =  doPost("getPolygon",body={"cm_id" : "1"})
+print (resp["cm_polygon"])
+polygon = np.array(json.loads(resp["cm_polygon"]))
+print(polygon)
+while cap.isOpened() and False: # for debug change to True
     # Read a frame from the video
     success, frame = cap.read()
     if success:
@@ -85,13 +99,13 @@ while cap.isOpened():
         if (key == ord('q')):
             break
         elif (key== ord('p')): 
-            polygon = [np.int32(points)]
+            polygon = [np.int32(points)] # type: ignore
             cv2.destroyWindow('Frame')
             cap.release()
             break
         cv2.setMouseCallback('Frame', left_click_detect, points)
 
-zone = sv.PolygonZone(polygon=np.array(points), frame_resolution_wh=video_info.resolution_wh)
+zone = sv.PolygonZone(polygon=polygon, frame_resolution_wh=video_info.resolution_wh)
 zone_annotator = sv.PolygonZoneAnnotator(zone=zone, color=sv.Color.white())
 cap = cv2.VideoCapture(video_path)
 

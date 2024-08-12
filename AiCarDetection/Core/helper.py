@@ -98,4 +98,4 @@ def process_frame_tracking(frame: np.ndarray, time_elapsed, previous_bbox ,time_
     annotated_frame = trace_annotator.annotate(annotated_frame, detections=detections)
     annotated_frame = zone_annotator.annotate(scene=annotated_frame)
     
-    return annotated_frame , time_counter, previous_bbox, parked, queue, cars
+    return annotated_frame , time_counter, previous_bbox, parked, queue, cars # type: ignore

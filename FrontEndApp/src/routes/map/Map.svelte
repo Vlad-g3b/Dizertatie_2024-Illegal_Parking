@@ -4,9 +4,17 @@
   import "leaflet/dist/leaflet.css";
   import "leaflet.heat";
   import "leaflet.heat?client"; //
+  import MarkerPopup from "./MarkerPopup.svelte";
+
   import { toast } from "@zerodevx/svelte-toast";
   import * as turf from "@turf/turf";
-  import type { HeatLayer, LatLngBoundsExpression, Layer, Map } from "leaflet";
+  import type {
+    HeatLayer,
+    LatLngBoundsExpression,
+    Layer,
+    Map,
+    Marker,
+  } from "leaflet";
 
   export let latitude: number;
   export let longitude: number;
@@ -14,7 +22,7 @@
   let list: any;
   let map: L.Map;
   let Leaflet;
-  let heatLayer: typeof HeatLayer;
+  let layerL: any;
   let randomPointInPoly = function (polygon: {
     getBounds: () => any;
     toGeoJSON: () => any;
@@ -97,22 +105,80 @@
     heatL = addFakePoints(heatL, poll);
     return heatL;
   }
-  infractionsStore.subscribe((infractions: any) => {
+  const unsubscribe = infractionsStore.subscribe((infractions: any) => {
     // Clear existing markers
     list = infractions;
-    let infractionsJSon = JSON.parse(infractions);
-    infractionsJSon.TrafficViolationList.forEach(
-      (infraction: { location: Array<number>; id: any }) => {
-        toast.push(`<div>Detected ${infraction.id} </div>`, {
-          theme: {
-            "--toastColor": "mintcream",
-            "--toastBackground": "rgba(72,187,120,0.9)",
-            "--toastBarBackground": "#2F855A",
-          },
-        });
-      }
-    );
+    let infractionList = JSON.parse(infractions);
+    console.log(infractionList);
+    let tfList: any[] = infractionList.TrafficViolationList;
+    console.log(layerL);
+    if (tfList.length == 1) {
+      toast.push(`<div>Detected ${tfList[0].id} </div>`, {
+        theme: {
+          "--toastColor": "mintcream",
+          "--toastBackground": "rgba(72,187,120,0.9)",
+          "--toastBarBackground": "#2F855A",
+        },
+      });
+    }
+    if (layerL != null) {
+      let infractionsJSon = JSON.parse(list);
+      infractionsJSon.TrafficViolationList.forEach(
+        (infraction: {
+          description: any;
+          location: Array<number>;
+          id: any;
+        }) => {
+          let arr: any = [infraction.location[0], infraction.location[1], 0.2];
+          layerL.push(arr);
+          let marker: Marker = L.marker([
+            infraction.location[0],
+            infraction.location[1],
+          ]);
+          let m = createMarker(infraction.location, infraction);
+          m.addTo(map);
+        }
+      );
+    }
   });
+
+  function bindPopup(marker: Marker, createFn: any) {
+    let popupComponent: any;
+    marker.bindPopup(
+      () => {
+        let container = L.DomUtil.create("div");
+        popupComponent = createFn(container);
+        return container;
+      },
+      { minWidth: 500 }
+    );
+
+    marker.on("popupclose", () => {
+      if (popupComponent) {
+        let old = popupComponent;
+        popupComponent = null;
+        // Wait to destroy until after the fadeout completes.
+        setTimeout(() => {
+          old.$destroy();
+        }, 500);
+      }
+    });
+  }
+  function createMarker(loc: any, infraction: any) {
+    let marker = L.marker(loc);
+    bindPopup(marker, (m: any) => {
+      //console.log(infraction);
+      let c = new MarkerPopup({
+        target: m,
+        props: {
+          infraction,
+        },
+      });
+      return c;
+    });
+
+    return marker;
+  }
   onMount(async () => {
     if (typeof window !== "undefined") {
       import("leaflet").then(async (L) => {
@@ -122,56 +188,17 @@
         }).addTo(map);
         var myList = JSON.parse(list).TrafficViolationList;
         let heatL = createFakeLines(L);
-        myList.forEach((element: any) => {
+        myList.forEach((infraction: any) => {
           let newArray: any = [];
-          newArray = newArray.concat(element.location, 0.2);
+          newArray = newArray.concat(infraction.location, 0.2);
           heatL.push(newArray);
-          let markcoord = element.location;
-          let content = `<div>ID:${element.id} Description:${element.description}</div>
-                        <form  method="post" action="?/resolveTf">
-                        <input type="hidden" name="id" value=${element.id} />
-                        <input type='submit' value="Mark as resolved!"/>
-                        </from>`;
-          let marker = L.marker([markcoord[0], markcoord[1]])
-            .addTo(map)
-            .bindPopup(content);
-          // marker.infractionId = element.id;
+          let markcoord = infraction.location;
+          let marker: Marker = L.marker([markcoord[0], markcoord[1]]);
+          let m = createMarker(markcoord, infraction);
+          m.addTo(map);
         });
         L.heatLayer(heatL, { radius: 20 }).addTo(map);
-        const unsubscribe = infractionsStore.subscribe((infractions: any) => {
-          // Clear existing markers
-          let infractionsJSon = JSON.parse(infractions);
-          console.log(infractionsJSon);
-          infractionsJSon.TrafficViolationList.forEach(
-            (infraction: {
-              description: any;
-              location: Array<never>;
-              id: any;
-            }) => {
-              let arr: any = [
-                infraction.location[0],
-                infraction.location[1],
-                0.2,
-              ];
-              heatL.push(arr);
-              let marker = L.marker([
-                infraction.location[0],
-                infraction.location[1],
-              ])
-                .addTo(map)
-                .bindPopup(
-                  `<div>ID:${infraction.id} Description:${infraction.description}</div>
-                  <form  method="post" action="?/resolveTf">
-                  <input type="hidden" name="id" value=${infraction.id} />
-                  <input type='submit' value="Mark as resolved!"/>
-                  </from>`
-                );
-
-              // Store infraction ID in marker for identification
-              //  marker.infractionId = infraction.id;
-            }
-          );
-        });
+        layerL = heatL;
         return unsubscribe;
       });
     }

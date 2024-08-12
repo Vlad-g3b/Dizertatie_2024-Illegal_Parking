@@ -17,7 +17,7 @@ export const server_loads = [0];
 export const dictionary = {
 		"/": [2],
 		"/admin/dashboard": [3],
-		"/live_feed": [4],
+		"/live_feed": [~4],
 		"/map": [~5],
 		"/ps_list": [~6],
 		"/statistics": [~7],
