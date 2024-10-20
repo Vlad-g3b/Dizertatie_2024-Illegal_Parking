@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { mount, unmount, onMount } from "svelte";
   import L from "leaflet";
   import "leaflet/dist/leaflet.css";
   import "leaflet.heat";
   import "leaflet.heat?client"; //
   import MarkerPopup from "./MarkerPopup.svelte";
+  import { page } from "$app/stores";
 
   import { toast } from "@zerodevx/svelte-toast";
   import * as turf from "@turf/turf";
@@ -159,7 +160,7 @@
         popupComponent = null;
         // Wait to destroy until after the fadeout completes.
         setTimeout(() => {
-          old.$destroy();
+          unmount(old);
         }, 500);
       }
     });
@@ -168,7 +169,7 @@
     let marker = L.marker(loc);
     bindPopup(marker, (m: any) => {
       //console.log(infraction);
-      let c = new MarkerPopup({
+      let c = mount(MarkerPopup, {
         target: m,
         props: {
           infraction,
@@ -182,7 +183,7 @@
   onMount(async () => {
     if (typeof window !== "undefined") {
       import("leaflet").then(async (L) => {
-        map = L.map("map").setView([latitude, longitude], 16);
+        map = L.map("map").setView([latitude, longitude], 200);
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "&copy; OpenStreetMap contributors",
         }).addTo(map);
@@ -195,7 +196,9 @@
           let markcoord = infraction.location;
           let marker: Marker = L.marker([markcoord[0], markcoord[1]]);
           let m = createMarker(markcoord, infraction);
-          m.addTo(map);
+          if ($page.data.session?.user != null) {
+            m.addTo(map);
+          }
         });
         L.heatLayer(heatL, { radius: 20 }).addTo(map);
         layerL = heatL;

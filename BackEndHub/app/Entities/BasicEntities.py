@@ -19,7 +19,8 @@ class User(BaseModel):
     usr_email: str
     usr_role: str | None = None
     usr_creation_date: Date | None = None
-
+    usr_profile_pic: str | None = None
+    
 class ParkingSite(BaseModel):
     ps_id: str
     ps_description: str | None = None

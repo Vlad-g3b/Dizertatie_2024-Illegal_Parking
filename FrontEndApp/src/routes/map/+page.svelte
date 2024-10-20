@@ -3,9 +3,23 @@
   import { writable } from "svelte/store";
   import type { PageData } from "./$types";
   import Spinner from "$lib/components/Spinner.svelte";
+  import { page } from "$app/stores"; // Import the page store from SvelteKit
+
   let Map: any;
   const infractionsStore = writable();
   export let data: PageData;
+
+  // Extract latitude and longitude from the URL
+  let latitude: number;
+  let longitude: number;
+
+  $: {
+    // Assuming your URL has query parameters like ?lat=...&lng=...
+    const urlParams = $page.url.searchParams;
+    latitude = parseFloat(urlParams.get("lat")) || 38.248747; // Default latitude if not provided
+    longitude = parseFloat(urlParams.get("lng")) || 21.738999; // Default longitude if not provided
+  }
+
   onMount(() => {
     infractionsStore.set(data.unresolvedTf);
     if (typeof window !== "undefined") {
@@ -29,14 +43,12 @@
       // Handle errors
       eventSource.close();
     };
-
-    
   });
 </script>
 
 {#if $infractionsStore !== null}
   {#if Map}
-    <Map {infractionsStore} latitude={38.248747} longitude={21.738999} />
+    <Map {infractionsStore} {latitude} {longitude} />
   {:else}
     <Spinner />
   {/if}

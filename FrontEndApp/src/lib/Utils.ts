@@ -18,6 +18,22 @@ export async function getUserFromDbByEmail(email: string | null | undefined) {
   }
   return null;
 }
+
+export async function getUsersFrom() {
+  try {
+    const res = await fetch(VITE_API_SERVER_URL + "/getUsers", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await res.json();
+  } catch (error) {
+    console.error(error);
+  }
+  return null;
+}
+
 export async function createUserProfile(
   profile: import("@auth/sveltekit").Profile | undefined
 ) {
@@ -30,6 +46,7 @@ export async function createUserProfile(
       body: JSON.stringify({
         usr_email: profile?.email,
         usr_name: profile?.name,
+        usr_profile_pic: profile?.picture,
       }),
     });
     return await res;
@@ -170,6 +187,48 @@ export async function getAllUnresolvedTrafficViolation() {
   );
   if (res.ok) {
     return await res.text();
+  } else {
+    // Sometimes the API will fail!
+    throw new Error("Request failed");
+  }
+}
+
+export async function editParkingSite(
+  ps_id: any,
+  ps_description: any,
+  ps_number: any
+) {
+  const res = await fetch(VITE_API_SERVER_URL + "/editParkingSite", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      ps_id: ps_id,
+      ps_description: ps_description,
+      ps_max_parking_spots: ps_number,
+    }),
+  });
+  if (res.ok) {
+    return await res.json();
+  } else {
+    // Sometimes the API will fail!
+    throw new Error("Request failed");
+  }
+}
+
+export async function deleteParkinSite(ps_id: any) {
+  const res = await fetch(VITE_API_SERVER_URL + "/deleteParkingSite", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      ps_id: ps_id,
+    }),
+  });
+  if (res.ok) {
+    return await res.json();
   } else {
     // Sometimes the API will fail!
     throw new Error("Request failed");

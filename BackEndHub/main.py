@@ -2,6 +2,7 @@ from pickle import NONE
 from typing import Annotated, Union
 from uu import Error
 from fastapi.security import OAuth2PasswordBearer
+from pydantic import Json
 import uvicorn
 from fastapi import FastAPI
 from starlette.types import Receive, Scope, Send
@@ -84,9 +85,37 @@ def getDataFromDb2():
 @app.get("/getStats")
 def getDataFromDb3():
     ms = MainService()
+    output = {}
     list_records = ms.getTrafficViolationStats() 
-    logger.debug(list_records)
-    return {'TrafficViolationStats' : list_records}
+    output['TrafficViolationStats'] = list_records 
+    list_records = ms.getTrafficViolationStats1() 
+    out = {}
+    for item in list_records:
+        parking_site = item[0] # type: ignore
+        violation_type = str(item[1])  # type: ignore # Convert to string for JSON-like key
+        count = item[2] # type: ignore
+        if parking_site not in out:
+            out[parking_site] = {}
+        if violation_type not in out[parking_site]:
+            out[parking_site][violation_type] = 0
+        out[parking_site][violation_type] += count
+    output['TrafficViolationStats1'] = out 
+    list_records = ms.getTrafficViolationStats2()
+    out = {}
+    for item in list_records:
+        parking_site = item[0] # type: ignore
+        violation_type = str(item[1])  # type: ignore # Convert to string for JSON-like key
+        count = item[2] # type: ignore
+        if parking_site not in out:
+            out[parking_site] = {}
+        out[parking_site]["0"] = 0
+        out[parking_site]["1"] = 0
+        out[parking_site][violation_type] += count
+
+    output['TrafficViolationStats2'] = out
+    list_records = ms.getTrafficViolationStats3() 
+    output['TrafficViolationStats3'] = list_records 
+    return output
 
 @app.get("/getAllTParkingSites")
 def getDataFromDb4():
@@ -102,10 +131,32 @@ def updateTFResolved(tf : BE.TrafficViolation):
     logger.debug(tf)
     return tf
 
+@app.patch("/editParkingSite")
+def editParkingSite(ob : BE.ParkingSite):
+    ms = MainService()
+    ms.updateParkingSite(ob.ps_id, ob.ps_description, ob.ps_max_parking_spots) 
+    logger.debug(ob)
+    return ob
+
+@app.delete("/deleteParkingSite")
+def deleteParkingSite(ob : BE.ParkingSite):
+    ms = MainService()
+    ms.deleteParkingSite(ob.ps_id) 
+    logger.debug(ob)
+    return ob
+
 @app.post("/getUser" )
 def getUser(user : BE.User):
     ms = MainService()
     output = ms.getUserByEmail(user.usr_email) 
+    if output == None:
+        raise HTTPException(status_code=404, detail="User Not Found!")
+    return output
+
+@app.get("/getUsers" )
+def getUsers():
+    ms = MainService()
+    output = ms.getUsers() 
     if output == None:
         raise HTTPException(status_code=404, detail="User Not Found!")
     return output

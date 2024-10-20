@@ -7,6 +7,15 @@
 		"src/routes/admin/api/get_polygon/+server.ts"
 	],
 	"/admin/dashboard": [
+		"src/routes/admin/dashboard/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/admin/ps_list": [
+		"src/routes/admin/ps_list/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/admin/tf_list": [
+		"src/routes/admin/tf_list/+page.server.ts",
 		"src/routes/+layout.server.ts"
 	],
 	"/live_feed": [
@@ -23,10 +32,6 @@
 	],
 	"/statistics": [
 		"src/routes/statistics/+page.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/tf_list": [
-		"src/routes/tf_list/+page.server.ts",
 		"src/routes/+layout.server.ts"
 	]
 }

@@ -1,1 +1,1 @@
-export { default as component } from "../../../../src/routes/map/+page.svelte";
+export { default as component } from "../../../../src/routes/admin/tf_list/+page.svelte";

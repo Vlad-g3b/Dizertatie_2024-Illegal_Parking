@@ -39,10 +39,10 @@
   onMount(() => {
     console.log("liost", tf_list);
     var mydata = JSON.parse(tf_list).TrafficViolationStats;
-    var labels = [];
-    var values = [];
-    var backgroundColor = [];
-    mydata.forEach((element) => {
+    var labels: any[] = [];
+    var values: any[] = [];
+    var backgroundColor: string[] = [];
+    mydata.forEach((element: any[]) => {
       console.log(element);
       labels.push(element[0]);
       values.push(element[1]);

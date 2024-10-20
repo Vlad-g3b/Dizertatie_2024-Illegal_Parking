@@ -18,6 +18,7 @@
     MapPinAltOutline,
     ScaleBalancedOutline,
   } from "flowbite-svelte-icons";
+  let adminPath = $page.data.session?.user == null ? "" : "admin/";
   $: activeUrl = $page.url.pathname;
   let divClass =
     "overflow-y-auto py-4 px-3 bg-custom-brown size-full dark:bg-gray-800";
@@ -48,7 +49,7 @@
           <Button on:click={() => signIn("github")}>Sign In</Button>
         </div>
       {/if}
-      <SidebarItem label="Dashboard" href="/">
+      <SidebarItem label="Dashboard" href="/{adminPath}dashboard">
         <svelte:fragment slot="icon">
           <ChartPieSolid class="w-6 h-6" />
         </svelte:fragment>
@@ -63,12 +64,14 @@
           <VideoCameraOutline class="w-6 h-6" />
         </svelte:fragment>
       </SidebarItem>
-      <SidebarItem label="Traffic Violations" href="/tf_list">
-        <svelte:fragment slot="icon">
-          <ExclamationCircleSolid class="w-6 h-6" />
-        </svelte:fragment>
-      </SidebarItem>
-      <SidebarItem label="Parking Sites" href="/ps_list">
+      {#if $page.data.session?.user != null}
+        <SidebarItem label="Traffic Violations" href="/{adminPath}tf_list">
+          <svelte:fragment slot="icon">
+            <ExclamationCircleSolid class="w-6 h-6" />
+          </svelte:fragment>
+        </SidebarItem>
+      {/if}
+      <SidebarItem label="Parking Sites" href="/{adminPath}ps_list">
         <svelte:fragment slot="icon">
           <MapPinAltOutline class="w-6 h-6" />
         </svelte:fragment>

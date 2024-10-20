@@ -3,6 +3,7 @@
   import { onMount } from "svelte";
   import { Card } from "flowbite-svelte";
   import type { PageData } from "./$types";
+  import { page } from "$app/stores";
   export let data: PageData;
   let video_sources = [
     {
@@ -293,9 +294,11 @@
         </div>
         <p class="mb-3">Description: add something later...</p>
         <div>
-          <Button pill on:click={() => takeScreenshot(video.id, video.cm_id)}>
-            Modify Limits
-          </Button>
+          {#if $page.data.session?.user != null}
+            <Button pill on:click={() => takeScreenshot(video.id, video.cm_id)}>
+              Modify Limits
+            </Button>
+          {/if}
         </div>
       </Card>
     {/each}

@@ -52,8 +52,8 @@ class MainService():
         with db.getConnection() as connection:
             with connection.cursor() as cursor:
                 try:
-                    cursor.execute(f"Insert into {self.database}.{self.tableNameUSR} ( usr_name, usr_email, usr_role) values (%s,%s,%s)" ,
-                                (user.usr_name, user.usr_email, "user"))
+                    cursor.execute(f"Insert into {self.database}.{self.tableNameUSR} ( usr_name, usr_email, usr_role,usr_profile_pic) values (%s,%s,%s,%s)" ,
+                                (user.usr_name, user.usr_email, "user", user.usr_profile_pic))
                     print(cursor.rowcount, "record inserted.")                
                 except :
                     raise Error("Something went wrong...")
@@ -79,11 +79,23 @@ class MainService():
         output = None
         with db.getConnection() as connection:
             with connection.cursor(dictionary=True) as cursor:
-                cursor.execute(f"Select usr_id,usr_name,usr_email,usr_creation_date,usr_role from {self.database}.{self.tableNameUSR} where usr_email = %s ", (email,))
+                cursor.execute(f"Select usr_id,usr_name,usr_email,usr_creation_date,usr_role, usr_profile_pic from {self.database}.{self.tableNameUSR} where usr_email = %s ", (email,))
                 print(cursor.rowcount, "records")                
                 output = cursor.fetchone()
                 if output:
                     return User(**output) #type: ignore
+        return
+
+    def getUsers(self):
+        db = DBConnection()
+        output = None
+        with db.getConnection() as connection:
+            with connection.cursor(dictionary=True) as cursor:
+                cursor.execute(f"Select usr_id,usr_name,usr_email,usr_creation_date,usr_role, usr_profile_pic from {self.database}.{self.tableNameUSR} ")
+                print(cursor.rowcount, "records")                
+                output = cursor.fetchall()
+                if output:
+                    return output #type: ignore
         return
 
     def getCameraById(self, id):
@@ -114,6 +126,36 @@ class MainService():
         with db.getConnection() as connection:
             with connection.cursor() as cursor:
                 cursor.execute(f"SELECT tf_ref_parksite, count(*) FROM {self.database}.{self.tableNameTF} group by tf_ref_parksite ")
+                print(cursor.rowcount, "records")                
+                outputList = cursor.fetchall()
+        return outputList
+
+    def getTrafficViolationStats1(self):
+        db = DBConnection()
+        outputList = []
+        with db.getConnection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(f"SELECT tf_ref_parksite, date(tf_date_ins), count(*) FROM {self.database}.{self.tableNameTF} as t group by tf_ref_parksite,date(tf_date_ins) ")
+                print(cursor.rowcount, "records")                
+                outputList = cursor.fetchall()
+        return outputList
+
+    def getTrafficViolationStats2(self):
+        db = DBConnection()
+        outputList = []
+        with db.getConnection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(f"SELECT tf_ref_parksite, tf_resolved, count(*) FROM {self.database}.{self.tableNameTF} group by tf_ref_parksite,tf_resolved ")
+                print(cursor.rowcount, "records")                
+                outputList = cursor.fetchall()
+        return outputList
+
+    def getTrafficViolationStats3(self):
+        db = DBConnection()
+        outputList = []
+        with db.getConnection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(f"SELECT coalesce(date(tf_date_resolved),date(now())), count(*) FROM {self.database}.{self.tableNameTF} as t group by coalesce(date(tf_date_resolved),date(now())) order by 2 ")
                 print(cursor.rowcount, "records")                
                 outputList = cursor.fetchall()
         return outputList
@@ -185,5 +227,22 @@ class MainService():
         with db.getConnection() as connection:
             with connection.cursor() as cursor:
                 cursor.execute(f"update {self.database}.{self.tableNameTF} set tf_resolved = {tf_resolved}, tf_date_resolved = now(), tf_user_name = %s where tf_id = %s ", (tf_username,tf_id,))
+                print(cursor.rowcount, "records")                
+            connection.commit()
+
+    def updateParkingSite(self, ps_id,ps_desc, ps_number):
+        db = DBConnection()
+        with db.getConnection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(f"update {self.database}.{self.tableNamePS} set ps_description = %s, ps_max_parking_spots = %s where ps_id = %s ", (ps_desc,int(ps_number),ps_id,))
+                print(cursor.rowcount, "records")                
+            connection.commit()
+            
+            
+    def deleteParkingSite(self, ps_id):
+        db = DBConnection()
+        with db.getConnection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(f"delete from {self.database}.{self.tableNamePS} where ps_id = %s ", (ps_id,))
                 print(cursor.rowcount, "records")                
             connection.commit()
