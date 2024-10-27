@@ -20,7 +20,17 @@ class User(BaseModel):
     usr_role: str | None = None
     usr_creation_date: Date | None = None
     usr_profile_pic: str | None = None
-    
+
+class Operation(BaseModel):
+    op_type: str
+    op_level: str
+
+class Log(BaseModel):
+    lg_id: int | None = None
+    lg_operation: Operation
+    lg_user_id: int
+    lg_description: str
+
 class ParkingSite(BaseModel):
     ps_id: str
     ps_description: str | None = None

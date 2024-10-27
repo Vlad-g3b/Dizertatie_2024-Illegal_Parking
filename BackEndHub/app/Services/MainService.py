@@ -2,7 +2,7 @@ from sqlite3 import IntegrityError
 from uu import Error
 
 from fastapi import HTTPException
-from app.Entities.BasicEntities import Camera, ParkingSite, User
+from app.Entities.BasicEntities import Camera, Log, ParkingSite, User
 from app.Helper.DBConnection import DBConnection
 import logging
 from app.Entities.TrafficViolation import TrafficViolation
@@ -16,6 +16,8 @@ class MainService():
         self.tableNameCM = 'Cameras'
         self.tableNamePS = 'ParkingSite'
         self.tableNameUSR = 'Users'
+        self.tableNameLOG = 'Logs'
+        self.tableNameOP = 'Operations'
         self.database = 'OnStreetParking'
  
  ######################
@@ -60,6 +62,23 @@ class MainService():
                 finally:
                     logging.debug(" do something after...")
             connection.commit()
+            
+    def insertLog(self, log : Log):
+        db = DBConnection()
+        with db.getConnection() as connection:
+            with connection.cursor() as cursor:
+                try:
+                    cursor.execute(f"Insert into {self.database}.{self.tableNameLOG} (lg_operation_id, lg_user_id, lg_description ) values ( (select op_id from {self.database}.{self.tableNameOP} where op_type = %s and op_level =%s), %s, %s) " ,
+                                (log.lg_operation.op_type, log.lg_operation.op_level, log.lg_user_id, log.lg_description))
+                    print(cursor.rowcount, "record inserted.")                
+                except Error as e:
+                    logging.error(e.__cause__)
+                    raise Error("Something went wrong...")
+                finally:
+                    logging.debug(" do something after...")
+            connection.commit()
+
+
  ######################
  #      Get           #
  ######################
@@ -92,6 +111,18 @@ class MainService():
         with db.getConnection() as connection:
             with connection.cursor(dictionary=True) as cursor:
                 cursor.execute(f"Select usr_id,usr_name,usr_email,usr_creation_date,usr_role, usr_profile_pic from {self.database}.{self.tableNameUSR} ")
+                print(cursor.rowcount, "records")                
+                output = cursor.fetchall()
+                if output:
+                    return output #type: ignore
+        return
+
+    def getLogs(self):
+        db = DBConnection()
+        output = None
+        with db.getConnection() as connection:
+            with connection.cursor(dictionary=True) as cursor:
+                cursor.execute(f"Select lg.lg_id, op.op_type, op.op_level, us.usr_name, lg.lg_description, lg.lg_date_ins from {self.database}.{self.tableNameLOG} lg join {self.database}.{self.tableNameOP} op on op.op_id = lg.lg_operation_id join {self.database}.{self.tableNameUSR} us on lg.lg_user_id = us.usr_id")
                 print(cursor.rowcount, "records")                
                 output = cursor.fetchall()
                 if output:

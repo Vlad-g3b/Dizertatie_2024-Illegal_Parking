@@ -18,7 +18,8 @@
     MapPinAltOutline,
     ScaleBalancedOutline,
   } from "flowbite-svelte-icons";
-  let adminPath = $page.data.session?.user == null ? "" : "admin/";
+  let adminPath = $page.data.session?.user == null ? "user/" : "admin/";
+  let homePage = $page.data.session?.user == null ? "/" : "/admin/dashboard";
   $: activeUrl = $page.url.pathname;
   let divClass =
     "overflow-y-auto py-4 px-3 bg-custom-brown size-full dark:bg-gray-800";
@@ -49,7 +50,7 @@
           <Button on:click={() => signIn("github")}>Sign In</Button>
         </div>
       {/if}
-      <SidebarItem label="Dashboard" href="/{adminPath}dashboard">
+      <SidebarItem label="Dashboard" href={homePage}>
         <svelte:fragment slot="icon">
           <ChartPieSolid class="w-6 h-6" />
         </svelte:fragment>

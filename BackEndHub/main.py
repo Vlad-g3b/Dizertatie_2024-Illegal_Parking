@@ -161,6 +161,14 @@ def getUsers():
         raise HTTPException(status_code=404, detail="User Not Found!")
     return output
 
+@app.get("/getLogs" )
+def getLogs():
+    ms = MainService()
+    output = ms.getLogs() 
+    if output == None:
+        raise HTTPException(status_code=404, detail="Logs Not Found!")
+    return output
+
 @app.post("/getPolygon" )
 def getPolygon(cam : BE.Camera):
     ms = MainService()
@@ -192,6 +200,16 @@ def insertUser(user : BE.User):
         raise HTTPException(status_code=305, detail="Something went wrong...")
     if output == None:
         raise HTTPException(status_code=404, detail="User Not Found!")
+    return output
+
+@app.post("/insertLog" )
+def insertLog(log : BE.Log):
+    ms = MainService()
+    try:
+        output = ms.insertLog(log) 
+    except Error as e:
+        print (e)
+        raise HTTPException(status_code=305, detail="Something went wrong...")
     return output
 
 @app.post("/notify")

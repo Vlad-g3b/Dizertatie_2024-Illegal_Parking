@@ -10,7 +10,8 @@ export const nodes = [
 	() => import('./nodes/6'),
 	() => import('./nodes/7'),
 	() => import('./nodes/8'),
-	() => import('./nodes/9')
+	() => import('./nodes/9'),
+	() => import('./nodes/10')
 ];
 
 export const server_loads = [0];
@@ -18,12 +19,13 @@ export const server_loads = [0];
 export const dictionary = {
 		"/": [2],
 		"/admin/dashboard": [~3],
-		"/admin/ps_list": [~4],
-		"/admin/tf_list": [~5],
-		"/live_feed": [~6],
-		"/map": [~7],
-		"/ps_list": [~8],
-		"/statistics": [~9]
+		"/admin/logs": [~4],
+		"/admin/ps_list": [~5],
+		"/admin/tf_list": [~6],
+		"/live_feed": [~7],
+		"/map": [~8],
+		"/ps_list": [~9],
+		"/statistics": [~10]
 	};
 
 export const hooks = {

@@ -16,7 +16,7 @@ export const authorizationHandle: Handle = async ({ event, resolve }) => {
       });
     }
   }
-  
+
   if (event.url.pathname.startsWith("/moderator")) {
     if (!session) {
       throw redirect(303, "/");
@@ -27,11 +27,11 @@ export const authorizationHandle: Handle = async ({ event, resolve }) => {
       });
     }
   }
-  
+
   if (event.url.pathname.startsWith("/user")) {
     if (!session) {
       // Redirect to the signin page
-      throw redirect(303, "/");
+      //throw redirect(303, "/");
     }
   }
   const response = await resolve(event);

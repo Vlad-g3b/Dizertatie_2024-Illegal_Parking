@@ -8,6 +8,7 @@
     type ListGroupItemType,
   } from "flowbite-svelte";
   import type { PageData } from "./$types";
+  import { goto } from "$app/navigation";
   export let data: PageData;
   interface listItemNews extends ListGroupItemType {
     id: any;
@@ -17,6 +18,9 @@
   }
   let listNews: listItemNews[] = data.latestNews;
   let listUser: any = data.users;
+  function goTo() {
+    goto("/admin/logs");
+  }
 </script>
 
 <title> HomePage ADMIN</title>
@@ -116,7 +120,7 @@
       <div
         class="grid grid-rows-4 grid-flow-col gap-4 border-0 dark:!bg-transparent"
       >
-        <Button color="blue">View Logs</Button>
+        <Button color="blue" on:click={goTo}>View Logssss</Button>
         <Button color="green">Add Notes</Button>
         <Button color="red">Delete Notes</Button>
         <Button color="blue">View Logs</Button>
@@ -128,7 +132,7 @@
     </Card>
     <div class="col-span-3 size-full w-full">
       <Card padding="xl" class="w-full size-full max-w-full">
-        <div class="flex justify-between items-center mb-4 ">
+        <div class="flex justify-between items-center mb-4">
           <h5
             class="text-xl font-bold leading-none text-gray-900 dark:text-white"
           >

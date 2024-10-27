@@ -125,6 +125,20 @@ export async function getAllTrafficViolation() {
   }
 }
 
+export async function getLogs() {
+  try {
+    const res = await fetch(VITE_API_SERVER_URL + "/getLogs");
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    } else {
+      throw new Error("Request failed");
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+}
+
 export async function getPolygon(cm_id: number) {
   try {
     const res = await fetch(VITE_API_SERVER_URL + "/getPolygon", {
