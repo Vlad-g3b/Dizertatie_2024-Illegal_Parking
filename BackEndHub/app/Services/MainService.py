@@ -2,7 +2,7 @@ from sqlite3 import IntegrityError
 from uu import Error
 
 from fastapi import HTTPException
-from app.Entities.BasicEntities import Camera, Log, ParkingSite, User
+from app.Entities.BasicEntities import Camera, Log, Note, ParkingSite, User
 from app.Helper.DBConnection import DBConnection
 import logging
 from app.Entities.TrafficViolation import TrafficViolation
@@ -18,11 +18,20 @@ class MainService():
         self.tableNameUSR = 'Users'
         self.tableNameLOG = 'Logs'
         self.tableNameOP = 'Operations'
+        self.tableNameNT = 'Notes'
         self.database = 'OnStreetParking'
  
  ######################
  #      Insert        #
  ######################
+
+    def insertNotes(self, note:Note):
+        db = DBConnection()
+        with db.getConnection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(f"Insert into {self.database}.{self.tableNameNT} (nt_user, nt_text) values ((select usr_id from {self.database}.{self.tableNameUSR} where usr_name = %s)  ,%s) ", (note.nt_user, note.nt_text))
+                print(cursor.rowcount, "record inserted.")                
+            connection.commit()
  
     def insertOrUpdatePolygon(self, cm_id, cm_ps_id, cm_polygon):
         db = DBConnection()
@@ -116,6 +125,28 @@ class MainService():
                 if output:
                     return output #type: ignore
         return
+
+    def getNotesByUser(self, nt_user):
+        db = DBConnection()
+        output = None
+        with db.getConnection() as connection:
+            with connection.cursor(dictionary=True) as cursor:
+                cursor.execute(f"Select nt_id,nt_user,nt_text from {self.database}.{self.tableNameNT} join {self.database}.{self.tableNameUSR} on nt_user = usr_id where usr_name = %s order by nt_date desc", (nt_user,))
+                print(cursor.rowcount, "records")                
+                output = cursor.fetchall()
+                if output:
+                    return output #type: ignore
+        return
+
+    def getNotesByUserLatest(self, nt_user):
+        db = DBConnection()
+        output = None
+        with db.getConnection() as connection:
+            with connection.cursor(dictionary=True) as cursor:
+                cursor.execute(f"Select nt_id,nt_user,nt_text,nt_date from {self.database}.{self.tableNameNT}  join {self.database}.{self.tableNameUSR} on nt_user = usr_id where usr_name  = %s order by nt_date desc", (nt_user,))
+                print(cursor.rowcount, "records")                
+                outputList = cursor.fetchall()
+        return outputList[0]
 
     def getLogs(self):
         db = DBConnection()
@@ -269,11 +300,22 @@ class MainService():
                 print(cursor.rowcount, "records")                
             connection.commit()
             
+ ######################
+ #      Delete        #
+ ######################
             
     def deleteParkingSite(self, ps_id):
         db = DBConnection()
         with db.getConnection() as connection:
             with connection.cursor() as cursor:
                 cursor.execute(f"delete from {self.database}.{self.tableNamePS} where ps_id = %s ", (ps_id,))
+                print(cursor.rowcount, "records")                
+            connection.commit()
+            
+    def deleteNote(self, nt_id):
+        db = DBConnection()
+        with db.getConnection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(f"delete from {self.database}.{self.tableNameNT} where nt_id = %s ", (nt_id,))
                 print(cursor.rowcount, "records")                
             connection.commit()

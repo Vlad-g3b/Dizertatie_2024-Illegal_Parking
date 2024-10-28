@@ -1,4 +1,5 @@
 import array
+from datetime import date
 from re import L
 from sqlite3 import Date
 from turtle import st
@@ -30,6 +31,11 @@ class Log(BaseModel):
     lg_operation: Operation
     lg_user_id: int
     lg_description: str
+
+class Note(BaseModel):
+    nt_id: int | None = None
+    nt_user: str | None = None
+    nt_text: str | None = None
 
 class ParkingSite(BaseModel):
     ps_id: str

@@ -82,6 +82,28 @@ export async function insertOrUpdatePolygon(
   return null;
 }
 
+export async function insertNote(
+  username: undefined | string | null
+) {
+  try {
+    const res = await fetch(VITE_API_SERVER_URL + "/insertNote", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nt_user: username,
+        nt_text: "",
+      }),
+    });
+    console.log("UserNOTED " + username);
+    return await res;
+  } catch (error) {
+    console.error(error);
+  }
+  return null;
+}
+
 export async function doUpdateResolved(
   id: string | undefined,
   username: string | null | undefined
@@ -199,6 +221,42 @@ export async function getAllUnresolvedTrafficViolation() {
   const res = await fetch(
     VITE_API_SERVER_URL + "/getAllUnresolvedTrafficViolation"
   );
+  if (res.ok) {
+    return await res.text();
+  } else {
+    // Sometimes the API will fail!
+    throw new Error("Request failed");
+  }
+}
+
+export async function getAllNotes(usr_id: any) {
+  const res = await fetch(VITE_API_SERVER_URL + "/getAllNotes", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      nt_user: usr_id,
+    }),
+  });
+  if (res.ok) {
+    return await res.text();
+  } else {
+    // Sometimes the API will fail!
+    throw new Error("Request failed");
+  }
+}
+
+export async function getLatestNotes(usr_id: any) {
+  const res = await fetch(VITE_API_SERVER_URL + "/getLatestNotes", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      nt_user: usr_id,
+    }),
+  });
   if (res.ok) {
     return await res.text();
   } else {

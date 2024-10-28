@@ -5,6 +5,7 @@
     Card,
     Listgroup,
     ListgroupItem,
+    Textarea,
     type ListGroupItemType,
   } from "flowbite-svelte";
   import type { PageData } from "./$types";
@@ -18,8 +19,21 @@
   }
   let listNews: listItemNews[] = data.latestNews;
   let listUser: any = data.users;
+  let latestNotes: any = data.latestNotes;
+  console.log(latestNotes);
   function goTo() {
     goto("/admin/logs");
+  }
+  let textareaprops = {
+    id: "message",
+    name: "message",
+    label: latestNotes.nt_text,
+    rows: 4,
+    placeholder: "Leave a note...",
+  };
+  function saveNote() {
+    console.log("Saved Note:", latestNotes);
+    // Add further save logic here as needed
   }
 </script>
 
@@ -120,14 +134,8 @@
       <div
         class="grid grid-rows-4 grid-flow-col gap-4 border-0 dark:!bg-transparent"
       >
-        <Button color="blue" on:click={goTo}>View Logssss</Button>
-        <Button color="green">Add Notes</Button>
-        <Button color="red">Delete Notes</Button>
-        <Button color="blue">View Logs</Button>
-        <Button color="blue">View Logs</Button>
-        <Button color="blue">View Logs</Button>
-        <Button color="blue">View Logs</Button>
-        <Button color="blue">View Logs</Button>
+        <Button color="blue" on:click={goTo}>View Logs</Button>
+        <Button color="red">+</Button>
       </div>
     </Card>
     <div class="col-span-3 size-full w-full">
@@ -136,20 +144,47 @@
           <h5
             class="text-xl font-bold leading-none text-gray-900 dark:text-white"
           >
-            Actions
+            Notes
           </h5>
         </div>
         <div
-          class="grid grid-rows-4 grid-flow-col gap-4 border-0 dark:!bg-transparent"
+          class="flex justify-between items-center border border-gray-200 rounded-lg p-4 dark:!bg-transparent"
         >
-          <Button color="blue">View Logs</Button>
-          <Button color="green">Add Notes</Button>
-          <Button color="red">Delete Notes</Button>
-          <Button color="blue">View Logs</Button>
-          <Button color="blue">View Logs</Button>
-          <Button color="blue">View Logs</Button>
-          <Button color="blue">View Logs</Button>
-          <Button color="blue">View Logs</Button>
+          <!-- Left side: Editable Latest Note -->
+          <Textarea
+            {...textareaprops}
+            value={latestNotes.nt_text}
+            class="text-gray-700 dark:text-gray-300 min-h-[100px] max-h-40 overflow-y-auto max-w-full p-2 rounded focus:outline-none whitespace-pre-wrap overflow-wrap break-word"
+          >
+            {latestNotes.nt_text}
+          </Textarea>
+          <form method="post" action="?/viewNotes">
+            <input type="hidden" name="nt_id" value={latestNotes.nt_id} />
+            <!-- Right side: Action Buttons -->
+            <div class="flex flex-col space-y-2 ml-4">
+              <Button pill color="blue" type="submit" name="view">
+                View All
+              </Button>
+              <Button
+                pill
+                color="green"
+                type="submit"
+                formaction="?/insert"
+                name="Insert"
+              >
+                Add Notes
+              </Button>
+              <Button
+                color="yellow"
+                type="submit"
+                formaction="?/edit"
+                name="edit"
+                pill
+              >
+                Edit
+              </Button>
+            </div>
+          </form>
         </div>
       </Card>
     </div>

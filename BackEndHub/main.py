@@ -75,6 +75,20 @@ def getDataFromDb():
     logger.debug(list_records)
     return {'TrafficViolationList' : list_records}
 
+@app.post("/getAllNotes")
+def getAllNotes(note: BE.Note):
+    ms = MainService()
+    list_records = ms.getNotesByUser(note.nt_user) 
+    logger.debug(list_records)
+    return list_records
+
+@app.post("/getLatestNotes")
+def getLatestNotes(note: BE.Note):
+    ms = MainService()
+    list_records = ms.getNotesByUserLatest(note.nt_user) 
+    logger.debug(list_records)
+    return list_records
+
 @app.get("/getAllUnresolvedTrafficViolation")
 def getDataFromDb2():
     ms = MainService()
@@ -145,6 +159,13 @@ def deleteParkingSite(ob : BE.ParkingSite):
     logger.debug(ob)
     return ob
 
+@app.delete("/deleteNote")
+def deleteNote(ob : BE.Note):
+    ms = MainService()
+    ms.deleteNote(ob.nt_id) 
+    logger.debug(ob)
+    return ob
+
 @app.post("/getUser" )
 def getUser(user : BE.User):
     ms = MainService()
@@ -207,6 +228,16 @@ def insertLog(log : BE.Log):
     ms = MainService()
     try:
         output = ms.insertLog(log) 
+    except Error as e:
+        print (e)
+        raise HTTPException(status_code=305, detail="Something went wrong...")
+    return output
+
+@app.post("/insertNote" )
+def insertNote(note : BE.Note):
+    ms = MainService()
+    try:
+        output = ms.insertNotes(note) 
     except Error as e:
         print (e)
         raise HTTPException(status_code=305, detail="Something went wrong...")
